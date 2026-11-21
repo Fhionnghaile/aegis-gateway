@@ -11,6 +11,9 @@ This is the front door of the Aegis detection pipeline. It receives security eve
 ## 3. Demo
 Capture to record: `go test ./... -race` passing, then the k6 load test with the Grafana 429 panel (`docker compose up --build` and `k6 run loadtest/k6-ingest.js`).
 
+![Real test run, captured 21 Nov 2026](docs/test-run.svg)
+*Real output from this repository's own tests, captured 21 Nov 2026.*
+
 ## 4. Run it yourself
 **Prerequisites:** Go. Docker and k6 for the full-stack load test.
 
