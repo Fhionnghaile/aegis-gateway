@@ -4,7 +4,7 @@
 > **A high-throughput ingest gateway for security events, backpressure-safe under load.**  
 > **Result:** 10 Go tests across 6 files; a load-test harness ships in the repo (`loadtest/`).  
 > **Reproduce:** `go test ./...   # load test: see loadtest/`  
-> ![CI](https://github.com/fhionnghaile/aegis-gateway/actions/workflows/ci.yml/badge.svg)
+> ![CI](https://github.com/fhionnghaile/aegis-gateway/actions/workflows/ci.yml/badge.svg) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Fhionnghaile/aegis-gateway/badge)](https://scorecard.dev/viewer/?uri=github.com/Fhionnghaile/aegis-gateway)
 >
 > **What this is worth:** The front door of a detection pipeline: if it drops or stalls under a flood, you are blind exactly when you are under attack.
 
