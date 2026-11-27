@@ -50,13 +50,17 @@ worker pool) · `internal/publish` (Publisher interface; memory + kafka impls) �
 (`/events` 202/400/429, `/healthz`, `/metrics`) · `internal/metrics` · `cmd/gateway` (wiring +
 SIGTERM drain).
 
+## Threat model and decisions
+- [`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md): STRIDE with evidence for each mitigation, five stated gaps and their fixes.
+- [`docs/adr/`](docs/adr/): architecture decision records.
+
 ## License
 MIT.
 
 ## Key decisions
 
 - Go for predictable concurrency and backpressure; bounded queues over unbounded buffering.
-- Schema-validated ingest at the edge, so malformed or hostile input is rejected before it reaches detection.
+- Ingest validated at the edge against the event schema contract, so malformed or hostile input is rejected before it reaches detection.
 - Grafana dashboards and a load-test shipped alongside, so capacity is a measurement, not a hope.
 
 ## Scope & limits
