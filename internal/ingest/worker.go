@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/padraigf/aegis-gateway/internal/metrics"
-	"github.com/padraigf/aegis-gateway/internal/publish"
+	"github.com/Fhionnghaile/aegis-gateway/internal/metrics"
+	"github.com/Fhionnghaile/aegis-gateway/internal/publish"
 )
 
 // Pool drains the queue into the Publisher with N workers. On Stop it drains

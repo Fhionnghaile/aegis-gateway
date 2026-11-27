@@ -1,3 +1,3 @@
-module github.com/padraigf/aegis-gateway
+module github.com/Fhionnghaile/aegis-gateway
 
 go 1.24

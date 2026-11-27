@@ -3,8 +3,8 @@
 package main
 
 import (
-	"github.com/padraigf/aegis-gateway/internal/config"
-	"github.com/padraigf/aegis-gateway/internal/publish"
+	"github.com/Fhionnghaile/aegis-gateway/internal/config"
+	"github.com/Fhionnghaile/aegis-gateway/internal/publish"
 )
 
 func newPublisher(cfg config.Config) publish.Publisher { return &publish.MemoryPublisher{} }

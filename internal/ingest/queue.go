@@ -3,7 +3,7 @@ package ingest
 import (
 	"errors"
 
-	"github.com/padraigf/aegis-gateway/internal/event"
+	"github.com/Fhionnghaile/aegis-gateway/internal/event"
 )
 
 // ErrFull signals back-pressure: the bounded queue is at capacity.

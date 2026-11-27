@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/padraigf/aegis-gateway/internal/event"
-	"github.com/padraigf/aegis-gateway/internal/ingest"
-	"github.com/padraigf/aegis-gateway/internal/metrics"
+	"github.com/Fhionnghaile/aegis-gateway/internal/event"
+	"github.com/Fhionnghaile/aegis-gateway/internal/ingest"
+	"github.com/Fhionnghaile/aegis-gateway/internal/metrics"
 )
 
 func newTestServer(cap int) *Server {

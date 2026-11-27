@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/padraigf/aegis-gateway/internal/event"
-	"github.com/padraigf/aegis-gateway/internal/ingest"
-	"github.com/padraigf/aegis-gateway/internal/metrics"
+	"github.com/Fhionnghaile/aegis-gateway/internal/event"
+	"github.com/Fhionnghaile/aegis-gateway/internal/ingest"
+	"github.com/Fhionnghaile/aegis-gateway/internal/metrics"
 )
 
 // Server exposes /events, /healthz, /metrics. ErrInvalid->400, ErrFull->429.

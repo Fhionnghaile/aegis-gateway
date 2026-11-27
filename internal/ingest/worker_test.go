@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/padraigf/aegis-gateway/internal/event"
-	"github.com/padraigf/aegis-gateway/internal/metrics"
-	"github.com/padraigf/aegis-gateway/internal/publish"
+	"github.com/Fhionnghaile/aegis-gateway/internal/event"
+	"github.com/Fhionnghaile/aegis-gateway/internal/metrics"
+	"github.com/Fhionnghaile/aegis-gateway/internal/publish"
 )
 
 func TestPoolDrainsOnStop(t *testing.T) {

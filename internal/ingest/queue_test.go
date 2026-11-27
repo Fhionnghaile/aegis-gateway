@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/padraigf/aegis-gateway/internal/event"
+	"github.com/Fhionnghaile/aegis-gateway/internal/event"
 )
 
 func TestBackPressure(t *testing.T) {

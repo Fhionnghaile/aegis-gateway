@@ -9,7 +9,7 @@ import (
 
 	"github.com/segmentio/kafka-go"
 
-	"github.com/padraigf/aegis-gateway/internal/event"
+	"github.com/Fhionnghaile/aegis-gateway/internal/event"
 )
 
 // KafkaPublisher writes events to Kafka/Redpanda, keyed by source|type.

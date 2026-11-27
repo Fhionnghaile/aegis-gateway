@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/padraigf/aegis-gateway/internal/event"
+	"github.com/Fhionnghaile/aegis-gateway/internal/event"
 )
 
 // Publisher is the sink the worker pool drains to (Kafka in prod, memory in tests).
