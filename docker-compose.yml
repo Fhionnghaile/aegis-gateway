@@ -8,6 +8,9 @@ services:
     # build with the kafka tag for the real sink:  docker build --build-arg TAGS=kafka
     environment:
       AEGIS_ADDR: ":8080"
+      # /metrics listens on 9091 inside the compose network only (not published to the host):
+      # Prometheus scrapes it; event senders cannot reach it.
+      AEGIS_ADMIN_ADDR: ":9091"
       AEGIS_KAFKA_BROKERS: "redpanda:9092"
       AEGIS_TOPIC: "events"
       AEGIS_QUEUE_CAP: "100000"

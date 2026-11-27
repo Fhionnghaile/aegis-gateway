@@ -5,13 +5,15 @@ import (
 	"io"
 	"net/http"
 	"sync/atomic"
+	"time"
 
 	"github.com/Fhionnghaile/aegis-gateway/internal/event"
 	"github.com/Fhionnghaile/aegis-gateway/internal/ingest"
 	"github.com/Fhionnghaile/aegis-gateway/internal/metrics"
 )
 
-// Server exposes /events, /healthz, /metrics. ErrInvalid->400, ErrFull->429.
+// Server exposes /events and /healthz on the public listener, and /metrics on a separate
+// internal-only admin listener (threat model I1). ErrInvalid->400, ErrFull->429.
 type Server struct {
 	val   event.Validator
 	q     *ingest.Queue
@@ -32,8 +34,38 @@ func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /events", s.postEvents)
 	mux.HandleFunc("GET /healthz", s.healthz)
+	return mux
+}
+
+// AdminHandler serves /metrics. Bind it to an internal address only (default 127.0.0.1:9091),
+// so traffic volumes and rejection rates are not visible to event senders (threat model I1).
+func (s *Server) AdminHandler() http.Handler {
+	mux := http.NewServeMux()
 	mux.Handle("GET /metrics", s.m.Handler())
 	return mux
+}
+
+// Timeouts applied to every listener (threat model D3: slow clients must not hold connections
+// open). Bodies are already capped at 1 MiB by MaxBytesReader.
+const (
+	ReadHeaderTimeout = 5 * time.Second
+	ReadTimeout       = 15 * time.Second
+	WriteTimeout      = 15 * time.Second
+	IdleTimeout       = 60 * time.Second
+	MaxHeaderBytes    = 64 << 10
+)
+
+// NewHTTPServer wraps a handler in an http.Server with the timeouts above.
+func NewHTTPServer(addr string, h http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              addr,
+		Handler:           h,
+		ReadHeaderTimeout: ReadHeaderTimeout,
+		ReadTimeout:       ReadTimeout,
+		WriteTimeout:      WriteTimeout,
+		IdleTimeout:       IdleTimeout,
+		MaxHeaderBytes:    MaxHeaderBytes,
+	}
 }
 
 func (s *Server) postEvents(wr http.ResponseWriter, r *http.Request) {

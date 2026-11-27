@@ -2,7 +2,7 @@
 
 <!-- at-a-glance -->
 > **A high-throughput ingest gateway for security events, backpressure-safe under load.**  
-> **Result:** 17 Go tests across 9 files, passing under the race detector; every internal package covered (4 at 100%); a load-test harness ships in the repo (`loadtest/`).  
+> **Result:** 19 Go tests across 9 files, passing under the race detector; every internal package covered (4 at 100%); a load-test harness ships in the repo (`loadtest/`).  
 > **Reproduce:** `go test ./...   # load test: see loadtest/`  
 > ![CI](https://github.com/fhionnghaile/aegis-gateway/actions/workflows/ci.yml/badge.svg) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Fhionnghaile/aegis-gateway/badge)](https://scorecard.dev/viewer/?uri=github.com/Fhionnghaile/aegis-gateway)
 >
@@ -17,7 +17,8 @@ worker pool -> Kafka**, with real back-pressure, graceful drain, and Prometheus 
   sheds load instead of running out of memory. Proven in tests and under k6.
 - **Graceful drain.** On `SIGTERM` the gateway stops accepting (503), finishes in-flight requests,
   then drains the queue into Kafka before exiting — no lost events.
-- **Observability built in.** `/metrics` exposes received / accepted / rejected / dropped / published.
+- **Observability built in.** `/metrics` exposes received / accepted / rejected / dropped / published, on a separate internal-only listener (default `127.0.0.1:9091`, `AEGIS_ADMIN_ADDR`), so event senders cannot read it.
+- **Slow clients cut off.** Every listener sets header, read, write and idle timeouts and a 64 KiB header cap (`httpapi.NewHTTPServer`), tested with a client that never finishes its headers.
 
 ## Throughput
 `go test -bench=IngestHTTP` measures **~240,000 events/sec** through the validate->enqueue path
@@ -32,7 +33,7 @@ go build ./cmd/gateway       # static binary (default in-memory sink)
 # full stack (Redpanda + Prometheus + Grafana):
 docker compose up --build
 k6 run loadtest/k6-ingest.js  # drive load; watch 429s rise, memory stay flat
-# metrics: http://localhost:8080/metrics   grafana: http://localhost:3000
+# metrics: internal only (Prometheus scrapes gateway:9091)   prometheus: http://localhost:9090   grafana: http://localhost:3000
 ```
 
 ### Kafka sink
@@ -47,11 +48,11 @@ go build -tags kafka ./cmd/gateway
 ## Layout
 `internal/event` (type + Normalise + schema validation) · `internal/ingest` (bounded queue +
 worker pool) · `internal/publish` (Publisher interface; memory + kafka impls) · `internal/httpapi`
-(`/events` 202/400/429, `/healthz`, `/metrics`) · `internal/metrics` · `cmd/gateway` (wiring +
+(`/events` 202/400/429, `/healthz`; `/metrics` on the admin listener) · `internal/metrics` · `cmd/gateway` (wiring +
 SIGTERM drain).
 
 ## Threat model and decisions
-- [`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md): STRIDE with evidence for each mitigation, five stated gaps and their fixes.
+- [`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md): STRIDE with evidence for each mitigation; five gaps found, two fixed (timeouts, internal-only metrics), three open with their fixes.
 - [`docs/adr/`](docs/adr/): architecture decision records.
 
 ## License

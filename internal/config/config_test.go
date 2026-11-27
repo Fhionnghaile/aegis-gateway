@@ -3,11 +3,11 @@ package config
 import "testing"
 
 func TestDefaults(t *testing.T) {
-	for _, k := range []string{"AEGIS_ADDR", "AEGIS_QUEUE_CAP", "AEGIS_WORKERS", "AEGIS_KAFKA_BROKERS", "AEGIS_TOPIC"} {
+	for _, k := range []string{"AEGIS_ADDR", "AEGIS_ADMIN_ADDR", "AEGIS_QUEUE_CAP", "AEGIS_WORKERS", "AEGIS_KAFKA_BROKERS", "AEGIS_TOPIC"} {
 		t.Setenv(k, "")
 	}
 	c := FromEnv()
-	want := Config{Addr: ":8080", QueueCap: 100_000, Workers: 8, Brokers: "localhost:9092", Topic: "events"}
+	want := Config{Addr: ":8080", AdminAddr: "127.0.0.1:9091", QueueCap: 100_000, Workers: 8, Brokers: "localhost:9092", Topic: "events"}
 	if c != want {
 		t.Fatalf("defaults: got %+v, want %+v", c, want)
 	}
@@ -15,12 +15,13 @@ func TestDefaults(t *testing.T) {
 
 func TestEnvOverrides(t *testing.T) {
 	t.Setenv("AEGIS_ADDR", ":9090")
+	t.Setenv("AEGIS_ADMIN_ADDR", "10.0.0.5:9191")
 	t.Setenv("AEGIS_QUEUE_CAP", "500")
 	t.Setenv("AEGIS_WORKERS", "2")
 	t.Setenv("AEGIS_KAFKA_BROKERS", "k1:9092,k2:9092")
 	t.Setenv("AEGIS_TOPIC", "audit")
 	c := FromEnv()
-	want := Config{Addr: ":9090", QueueCap: 500, Workers: 2, Brokers: "k1:9092,k2:9092", Topic: "audit"}
+	want := Config{Addr: ":9090", AdminAddr: "10.0.0.5:9191", QueueCap: 500, Workers: 2, Brokers: "k1:9092,k2:9092", Topic: "audit"}
 	if c != want {
 		t.Fatalf("overrides: got %+v, want %+v", c, want)
 	}

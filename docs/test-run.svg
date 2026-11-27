@@ -5,11 +5,11 @@
 <text x="436.5" y="21" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial" font-size="12" fill="#cbd5e1">aegis-gateway — real test run (go vet + race + cover), captured 27 Nov 2026</text>
 <g font-family="ui-monospace,Consolas,Menlo,monospace" font-size="13">
 <text x="18" y="50" fill="#7dd3fc" xml:space="preserve">$ go vet ./... &amp;&amp; go test -race -cover ./internal/...</text>
-<text x="18" y="68" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/config    1.023s    coverage: 100.0% of statements</text>
-<text x="18" y="86" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/event    1.025s    coverage: 100.0% of statements</text>
-<text x="18" y="104" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/httpapi    1.025s    coverage: 81.1% of statements</text>
-<text x="18" y="122" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/ingest    1.024s    coverage: 81.8% of statements</text>
-<text x="18" y="140" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/metrics    1.031s    coverage: 100.0% of statements</text>
-<text x="18" y="158" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/publish    1.053s    coverage: 100.0% of statements</text>
+<text x="18" y="68" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/config    1.030s    coverage: 100.0% of statements</text>
+<text x="18" y="86" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/event    1.045s    coverage: 100.0% of statements</text>
+<text x="18" y="104" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/httpapi    1.264s    coverage: 82.5% of statements</text>
+<text x="18" y="122" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/ingest    1.066s    coverage: 81.8% of statements</text>
+<text x="18" y="140" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/metrics    1.034s    coverage: 100.0% of statements</text>
+<text x="18" y="158" fill="#86efac" xml:space="preserve">ok      github.com/Fhionnghaile/aegis-gateway/internal/publish    1.057s    coverage: 100.0% of statements</text>
 <text x="18" y="176" fill="#86efac" xml:space="preserve">[exit 0]</text>
 </g></svg>
