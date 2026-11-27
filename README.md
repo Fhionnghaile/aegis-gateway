@@ -2,7 +2,7 @@
 
 <!-- at-a-glance -->
 > **A high-throughput ingest gateway for security events, backpressure-safe under load.**  
-> **Result:** 10 Go tests across 6 files; a load-test harness ships in the repo (`loadtest/`).  
+> **Result:** 17 Go tests across 9 files, passing under the race detector; every internal package covered (4 at 100%); a load-test harness ships in the repo (`loadtest/`).  
 > **Reproduce:** `go test ./...   # load test: see loadtest/`  
 > ![CI](https://github.com/fhionnghaile/aegis-gateway/actions/workflows/ci.yml/badge.svg) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Fhionnghaile/aegis-gateway/badge)](https://scorecard.dev/viewer/?uri=github.com/Fhionnghaile/aegis-gateway)
 >
