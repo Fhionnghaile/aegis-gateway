@@ -21,6 +21,8 @@ func TestExposesEveryCounterInPrometheusTextFormat(t *testing.T) {
 	m.Rejected.Add(1)
 	m.Dropped.Add(1)
 	m.Published.Add(2)
+	m.Refused.Add(4)
+	m.Contained.Add(1)
 	body, ct := scrape(t, &m)
 	if ct != "text/plain; version=0.0.4" {
 		t.Fatalf("content type %q", ct)
@@ -28,7 +30,8 @@ func TestExposesEveryCounterInPrometheusTextFormat(t *testing.T) {
 	for name, v := range map[string]string{
 		"aegis_events_received_total": "5", "aegis_events_accepted_total": "3",
 		"aegis_events_rejected_total": "1", "aegis_events_dropped_total": "1",
-		"aegis_events_published_total": "2",
+		"aegis_events_published_total": "2", "aegis_events_refused_total": "4",
+		"aegis_containments_total": "1",
 	} {
 		if !strings.Contains(body, "# TYPE "+name+" counter\n") {
 			t.Errorf("missing TYPE line for %s", name)

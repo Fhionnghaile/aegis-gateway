@@ -12,6 +12,11 @@ type Config struct {
 	Workers   int
 	Brokers   string
 	Topic     string
+	// Containment (ML n20_10): block a client after GuardThreshold invalid events within
+	// GuardWindowSec; blocks last BlockTTLSec. GuardThreshold 0 turns the guard off.
+	GuardThreshold int
+	GuardWindowSec int
+	BlockTTLSec    int
 }
 
 func FromEnv() Config {
@@ -22,6 +27,10 @@ func FromEnv() Config {
 		Workers:   envInt("AEGIS_WORKERS", 8),
 		Brokers:   env("AEGIS_KAFKA_BROKERS", "localhost:9092"),
 		Topic:     env("AEGIS_TOPIC", "events"),
+
+		GuardThreshold: envInt("AEGIS_GUARD_THRESHOLD", 20),
+		GuardWindowSec: envInt("AEGIS_GUARD_WINDOW_SEC", 10),
+		BlockTTLSec:    envInt("AEGIS_BLOCK_TTL_SEC", 900),
 	}
 }
 

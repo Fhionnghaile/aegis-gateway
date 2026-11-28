@@ -15,8 +15,20 @@ services:
       AEGIS_TOPIC: "events"
       AEGIS_QUEUE_CAP: "100000"
       AEGIS_WORKERS: "8"
+      # Guard: block a client after 20 invalid events in 10 s. It keys on the TCP peer address, so
+      # behind a load balancer (one peer for everyone) turn it off with 0. CI sets 0 for the load test.
+      AEGIS_GUARD_THRESHOLD: "${AEGIS_GUARD_THRESHOLD:-20}"
     ports: ["8080:8080"]
     depends_on: [redpanda]
+  responder:
+    # Detection -> containment: blocks hostile senders at the gateway via its internal admin listener.
+    build: {context: "."}
+    entrypoint: ["/responder"]
+    environment:
+      AEGIS_ADMIN_URL: "http://gateway:9091"
+      AEGIS_RESPONDER_ADDR: ":9092"
+    ports: ["127.0.0.1:9092:9092"]
+    depends_on: [gateway]
   prometheus:
     image: prom/prometheus:v2.54.1
     volumes: ["./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]

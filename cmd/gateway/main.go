@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Fhionnghaile/aegis-gateway/internal/config"
+	"github.com/Fhionnghaile/aegis-gateway/internal/contain"
 	"github.com/Fhionnghaile/aegis-gateway/internal/event"
 	"github.com/Fhionnghaile/aegis-gateway/internal/httpapi"
 	"github.com/Fhionnghaile/aegis-gateway/internal/ingest"
@@ -35,6 +36,15 @@ func main() {
 	pool.Start(ctx)
 
 	srv := httpapi.New(val, q, m)
+	bl := contain.NewBlocklist()
+	var guard *contain.Guard
+	if cfg.GuardThreshold > 0 {
+		guard = contain.NewGuard(bl, cfg.GuardThreshold, time.Duration(cfg.GuardWindowSec)*time.Second, time.Duration(cfg.BlockTTLSec)*time.Second)
+		guard.OnContain = func(c contain.Containment) {
+			log.Printf("contained %s after %d invalid events in %s", c.Key, c.BadRequests, c.TimeToBlock)
+		}
+	}
+	srv.WithContainment(bl, guard)
 	hs := httpapi.NewHTTPServer(cfg.Addr, srv.Handler())
 	admin := httpapi.NewHTTPServer(cfg.AdminAddr, srv.AdminHandler())
 	go func() {
@@ -57,7 +67,7 @@ func main() {
 	defer cancel()
 	_ = hs.Shutdown(shutCtx) // finish in-flight requests
 	_ = admin.Shutdown(shutCtx)
-	pool.Stop()              // drain the queue into the publisher
+	pool.Stop() // drain the queue into the publisher
 	_ = pub.Close()
 	log.Println("drained; bye")
 }

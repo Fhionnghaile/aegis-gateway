@@ -11,4 +11,4 @@ jobs:
         with: { go-version: '1.24' }
       - run: go vet ./...
       - run: go test ./... -race
-      - run: go build ./cmd/gateway
+      - run: go build ./cmd/gateway ./cmd/responder

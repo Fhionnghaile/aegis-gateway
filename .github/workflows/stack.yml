@@ -1,0 +1,34 @@
+name: Stack
+# Runs the gateway and the responder together as containers, then:
+#   1. load test (k6): every response is 202 or 429 (back-pressure), never a 5xx;
+#   2. injected attack: a detection in aegis-detector's exact format goes to the responder, and the
+#      job measures how long until the hostile sensor's events are refused, and that none slip through.
+# The results land in the job summary.
+on: { push: { branches: [main] }, schedule: [{ cron: "58 6 * * 1" }], workflow_dispatch: {} }
+permissions:
+  contents: read
+jobs:
+  stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Start gateway + responder
+        env:
+          AEGIS_GUARD_THRESHOLD: "0" # load test traffic all comes from one address; the guard is measured in go test
+        run: |
+          docker compose up -d --build --no-deps gateway responder
+          for i in $(seq 1 60); do curl -fsS http://localhost:8080/healthz && break; sleep 1; done
+      - name: Load test (k6, CI profile)
+        run: |
+          docker run --rm --network host -e PEAK=5000 -e HOLD=30s -v "$PWD/loadtest:/lt:ro" grafana/k6:0.54.0 run --summary-export=/dev/stdout /lt/k6-ingest.js > k6.json || { cat k6.json; exit 1; }
+          python3 -c "import json;m=json.load(open('k6.json'))['metrics'];r=m['http_reqs'];c=m['checks'];print('### Load test (k6, peak 5,000 req/s on a CI runner)');print('| Requests | Rate (req/s) | 202 or 429 |');print('|--:|--:|--:|');print(f\"| {r['count']} | {r['rate']:.0f} | {100*c['value']:.2f}% |\")" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Injected attack -> detection -> containment (measured)
+        run: bash loadtest/contain-check.sh | tee -a "$GITHUB_STEP_SUMMARY"; exit "${PIPESTATUS[0]}"
+      - name: Logs and teardown
+        if: always()
+        run: |
+          docker compose logs --no-color gateway responder | tail -40
+          docker compose down -v

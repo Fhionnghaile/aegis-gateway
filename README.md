@@ -2,7 +2,7 @@
 
 <!-- at-a-glance -->
 > **A high-throughput ingest gateway for security events, backpressure-safe under load.**  
-> **Result:** 19 Go tests across 9 files, passing under the race detector; every internal package covered (4 at 100%); a load-test harness ships in the repo (`loadtest/`).  
+> **Result:** 26 Go tests across 11 files, race-clean; **automated containment measured end to end**: a detection becomes a gateway block in about 1 ms on loopback, with 0 of 201 hostile requests let through afterwards. A k6 load test and an injected-attack check run in GitHub Actions on every push (`Stack` workflow).  
 > **Reproduce:** `go test ./...   # load test: see loadtest/`  
 > ![CI](https://github.com/fhionnghaile/aegis-gateway/actions/workflows/ci.yml/badge.svg) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Fhionnghaile/aegis-gateway/badge)](https://scorecard.dev/viewer/?uri=github.com/Fhionnghaile/aegis-gateway)
 >
@@ -24,6 +24,31 @@ worker pool -> Kafka**, with real back-pressure, graceful drain, and Prometheus 
 `go test -bench=IngestHTTP` measures **~240,000 events/sec** through the validate->enqueue path
 (in-process, 2 vCPU) — comfortably past the 50k target. For the end-to-end network + Kafka number and
 the Grafana 429 panel, run the load test below.
+
+## Containment: detection to block, automatically (respond, not just detect)
+```
+aegis-detector --(detection JSON)--> responder --POST /admin/block--> gateway --> 403 for the hostile sender
+                                                       gateway guard: 20 invalid events in 10 s --> block that client
+```
+- **Responder** (`cmd/responder`, `internal/respond`): takes the detector's own output format, maps
+  `rule_id` to a containment action through a policy (block the event **source**, or a client **IP**,
+  for a set time), acts only on high or critical detections, and returns only once the gateway has
+  confirmed the block. It reads detections over HTTP, or as JSON lines on stdin, so it can sit straight
+  on the detections topic: `rpk topic consume detections -f '%v\n' | responder -stdin`.
+- **Gateway** (`internal/contain`): blocks are time-limited and managed on the internal admin listener
+  (`/admin/block`, `/admin/unblock`, `/admin/blocked`), never on the public port. A built-in guard blocks
+  a client flooding invalid events without waiting for anyone.
+
+**Measured** (`go test ./internal/respond -run Containment -v`, loopback, 28 Nov 2026):
+| Path | Detection to block in force | Hostile requests let through after | Collateral |
+|---|--:|--:|---|
+| Detector detection, via responder | about 1 ms | 0 of 201 | healthy sensor unaffected |
+| Built-in guard (invalid-event flood) | blocked on the 21st request (5 ms from the flood's start) | 0 | none |
+
+The CI `Stack` workflow repeats the detector path against the real containers and posts the numbers
+to the job summary. **Limits:** the guard keys on the TCP peer address, so behind a load balancer
+(one address for every client) set `AEGIS_GUARD_THRESHOLD=0`; blocking a `source` is only as strong
+as the source identity, which is self-asserted until per-sensor authentication lands (threat model F1).
 
 ## Run
 ```bash
@@ -48,7 +73,7 @@ go build -tags kafka ./cmd/gateway
 ## Layout
 `internal/event` (type + Normalise + schema validation) · `internal/ingest` (bounded queue +
 worker pool) · `internal/publish` (Publisher interface; memory + kafka impls) · `internal/httpapi`
-(`/events` 202/400/429, `/healthz`; `/metrics` on the admin listener) · `internal/metrics` · `cmd/gateway` (wiring +
+(`/events` 202/400/429, `/healthz`; `/metrics` on the admin listener) · `internal/metrics` · `internal/contain` (blocklist + guard) · `internal/respond` + `cmd/responder` (detection to block) · `cmd/gateway` (wiring +
 SIGTERM drain).
 
 ## Threat model and decisions

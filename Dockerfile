@@ -4,10 +4,12 @@ WORKDIR /src
 COPY go.mod ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /gateway ./cmd/gateway
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /gateway ./cmd/gateway \
+ && CGO_ENABLED=0 go build -ldflags="-s -w" -o /responder ./cmd/responder
 
 FROM scratch
 COPY --from=build /gateway /gateway
+COPY --from=build /responder /responder
 COPY schemas /schemas
 USER 65534:65534
 EXPOSE 8080

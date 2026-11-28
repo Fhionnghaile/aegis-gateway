@@ -14,6 +14,8 @@ type Metrics struct {
 	Rejected  atomic.Int64 // failed validation -> 400
 	Dropped   atomic.Int64 // back-pressure     -> 429
 	Published atomic.Int64
+	Refused   atomic.Int64 // sender or source blocked -> 403
+	Contained atomic.Int64 // automatic containments (guard)
 }
 
 func (m *Metrics) Handler() http.HandlerFunc {
@@ -28,6 +30,8 @@ func (m *Metrics) Handler() http.HandlerFunc {
 			{"aegis_events_rejected_total", m.Rejected.Load()},
 			{"aegis_events_dropped_total", m.Dropped.Load()},
 			{"aegis_events_published_total", m.Published.Load()},
+			{"aegis_events_refused_total", m.Refused.Load()},
+			{"aegis_containments_total", m.Contained.Load()},
 		} {
 			fmt.Fprintf(wr, "# TYPE %s counter\n%s %d\n", kv.name, kv.name, kv.val)
 		}
